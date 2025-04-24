@@ -1,13 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI-powered Productivity Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Productivity Dashboard</title>
+
+  <!-- Firebase Initialization Script -->
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCl6IUeUlkrdb5hcw8dn6HgHmdvoVXc_jQ",
+      authDomain: "ai-productivity-dashboard.firebaseapp.com",
+      projectId: "ai-productivity-dashboard",
+      storageBucket: "ai-productivity-dashboard.firebasestorage.app",
+      messagingSenderId: "828472395583",
+      appId: "1:828472395583:web:8fb95057ff924c44aeb58a",
+      measurementId: "G-JYLP75THVV"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+  </script>
 </head>
 <body>
-    <h1>Welcome to Your AI Dashboard</h1>
-    <script src="app.js"></script>
+  <h1>Welcome to the AI Productivity Dashboard!</h1>
+
+  <!-- Your app content here, like task manager, notes, etc. -->
+  <div id="dashboard">
+    <!-- Add your sections, tasks, widgets, etc. -->
+    <p>This is where your AI-powered productivity tools will be displayed.</p>
+  </div>
+
+  <!-- You can add other scripts or features below if needed -->
 </body>
 </html>
