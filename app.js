@@ -1,168 +1,160 @@
-// Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyAHrbrU8BWFB4JEvIsvVquNEEU2EYf3uck",
-  authDomain: "productivity-dashboard-with-ai.firebaseapp.com",
-  projectId: "productivity-dashboard-with-ai",
-  storageBucket: "productivity-dashboard-with-ai.appspot.com",
-  messagingSenderId: "10807938376",
-  appId: "1:10807938376:web:efdda234b5b24821aab77d"
-};
-
 // Initialize Firebase
+const firebaseConfig = {
+    // your firebase config here
+};
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+
 const db = firebase.firestore();
+const auth = firebase.auth();
 
-const signInButton = document.querySelector("#auth-section button:nth-child(1)");
-const signOutButton = document.querySelector("#auth-section button:nth-child(2)");
-const taskSection = document.getElementById("task-section");
-const stickyNotesSection = document.getElementById("sticky-notes-section");
-const taskForm = document.getElementById("task-form");
-const taskList = document.getElementById("task-list");
-const stickyNoteForm = document.getElementById("sticky-note-form");
-const stickyNoteList = document.getElementById("sticky-note-list");
+let taskInput = document.getElementById("taskInput");
+let taskList = document.getElementById("taskList");
+let addTaskBtn = document.getElementById("addTaskBtn");
+let loginBtn = document.getElementById("loginBtn");
+let logoutBtn = document.getElementById("logoutBtn");
 
-function signIn() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider);
-}
+let currentUser = null;
 
-function signOut() {
-  auth.signOut();
-}
+auth.onAuthStateChanged(async function(user)
+{
+    if (user)
+    {
+        currentUser = user;
+        await loadTasks();
+        loginBtn.style.display = "none";
+        logoutBtn.style.display = "inline-block";
+    }
+    else
+    {
+        currentUser = null;
+        taskList.innerHTML = "";
+        loginBtn.style.display = "inline-block";
+        logoutBtn.style.display = "none";
+    }
+});
 
-auth.onAuthStateChanged(user => {
-  if (user) {
-    console.log("Signed in as:", user.displayName);
-    signInButton.style.display = "none";
-    signOutButton.style.display = "inline-block";
-    taskSection.style.display = "block";
-    stickyNotesSection.style.display = "block"; // Make sure sticky notes section is visible when logged in
-    loadTasks();
-    loadStickyNotes();
-  } else {
-    console.log("Not signed in");
-    signInButton.style.display = "inline-block";
-    signOutButton.style.display = "none";
-    taskSection.style.display = "none";
-    stickyNotesSection.style.display = "none"; // Hide sticky notes section when not signed in
+async function loadTasks()
+{
     taskList.innerHTML = "";
-    stickyNoteList.innerHTML = "";
-  }
-});
 
-taskForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const taskText = document.getElementById("task-input").value;
-  if (taskText.trim() !== "") {
-    await db.collection("tasks").add({
-      task: taskText,
-      completed: false,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    taskForm.reset();
-    loadTasks();
-  }
-});
+    if (!currentUser)
+    {
+        return;
+    }
 
-async function loadTasks() {
-  taskList.innerHTML = "";
-  const snapshot = await db.collection("tasks").orderBy("timestamp", "desc").get();
-  snapshot.forEach(doc => {
-    const li = document.createElement("li");
-    const taskData = doc.data();
-    li.classList.add("task-item");
-    
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = taskData.completed;
-    checkbox.addEventListener("change", async () => {
-      await db.collection("tasks").doc(doc.id).update({
-        completed: checkbox.checked
-      });
+    let querySnapshot = await db.collection("tasks").where("uid", "==", currentUser.uid).get();
+    let tasks = [];
+
+    querySnapshot.forEach(function(doc)
+    {
+        let data = doc.data();
+        tasks.push({
+            id: doc.id,
+            text: data.text,
+            priority: data.priority || "Low"
+        });
     });
 
-    const taskText = document.createElement("span");
-    taskText.textContent = taskData.task;
-    taskText.classList.add(taskData.completed ? "completed" : "");
+    tasks.sort(comparePriority);
 
-    const editButton = document.createElement("button");
-    editButton.textContent = "Edit";
-    editButton.addEventListener("click", async () => {
-      const newTask = prompt("Edit your task", taskData.task);
-      if (newTask) {
-        await db.collection("tasks").doc(doc.id).update({ task: newTask });
-        loadTasks();
-      }
+    tasks.forEach(function(task)
+    {
+        addTaskToUI(task.id, task.text, task.priority);
+    });
+}
+
+function comparePriority(a, b)
+{
+    const priorityOrder = { "High": 1, "Medium": 2, "Low": 3 };
+    return priorityOrder[a.priority] - priorityOrder[b.priority];
+}
+
+function addTaskToUI(id, text, priority)
+{
+    let li = document.createElement("li");
+    li.className = "task-item";
+    li.setAttribute("data-id", id);
+
+    let span = document.createElement("span");
+    span.innerText = text;
+
+    let select = document.createElement("select");
+    select.innerHTML = `
+        <option value="High" ${priority === "High" ? "selected" : ""}>High</option>
+        <option value="Medium" ${priority === "Medium" ? "selected" : ""}>Medium</option>
+        <option value="Low" ${priority === "Low" ? "selected" : ""}>Low</option>
+    `;
+    select.addEventListener("change", function()
+    {
+        updatePriority(id, select.value);
     });
 
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
-    deleteButton.addEventListener("click", async () => {
-      await db.collection("tasks").doc(doc.id).delete();
-      loadTasks();
+    let deleteBtn = document.createElement("button");
+    deleteBtn.innerText = "Delete";
+    deleteBtn.addEventListener("click", function()
+    {
+        deleteTask(id);
     });
 
-    li.appendChild(checkbox);
-    li.appendChild(taskText);
-    li.appendChild(editButton);
-    li.appendChild(deleteButton);
+    li.appendChild(span);
+    li.appendChild(select);
+    li.appendChild(deleteBtn);
     taskList.appendChild(li);
-  });
 }
 
-// Sticky Notes Section
-stickyNoteForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const noteText = document.getElementById("sticky-note-input").value;
-  if (noteText.trim() !== "") {
-    await db.collection("sticky-notes").add({
-      note: noteText,
-      priority: "low", // Default priority
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    stickyNoteForm.reset();
-    loadStickyNotes();
-  }
-});
+async function addTask()
+{
+    if (!currentUser || taskInput.value.trim() === "")
+    {
+        return;
+    }
 
-async function loadStickyNotes() {
-  stickyNoteList.innerHTML = "";
-  const snapshot = await db.collection("sticky-notes").orderBy("timestamp", "desc").get();
-  snapshot.forEach(doc => {
-    const li = document.createElement("li");
-    const noteData = doc.data();
-    li.classList.add("sticky-note-item");
-
-    const prioritySelect = document.createElement("select");
-    const options = ["low", "medium", "high"];
-    options.forEach(priority => {
-      const option = document.createElement("option");
-      option.value = priority;
-      option.textContent = priority;
-      if (noteData.priority === priority) option.selected = true;
-      prioritySelect.appendChild(option);
-    });
-    
-    prioritySelect.addEventListener("change", async () => {
-      await db.collection("sticky-notes").doc(doc.id).update({
-        priority: prioritySelect.value
-      });
+    let docRef = await db.collection("tasks").add({
+        uid: currentUser.uid,
+        text: taskInput.value.trim(),
+        priority: "Low"
     });
 
-    const noteText = document.createElement("span");
-    noteText.textContent = noteData.note;
-
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
-    deleteButton.addEventListener("click", async () => {
-      await db.collection("sticky-notes").doc(doc.id).delete();
-      loadStickyNotes();
-    });
-
-    li.appendChild(prioritySelect);
-    li.appendChild(noteText);
-    li.appendChild(deleteButton);
-    stickyNoteList.appendChild(li);
-  });
+    addTaskToUI(docRef.id, taskInput.value.trim(), "Low");
+    taskInput.value = "";
 }
+
+async function updatePriority(id, newPriority)
+{
+    if (!currentUser)
+    {
+        return;
+    }
+
+    await db.collection("tasks").doc(id).update({
+        priority: newPriority
+    });
+
+    await loadTasks();
+}
+
+async function deleteTask(id)
+{
+    if (!currentUser)
+    {
+        return;
+    }
+
+    await db.collection("tasks").doc(id).delete();
+    await loadTasks();
+}
+
+function login()
+{
+    let provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider);
+}
+
+function logout()
+{
+    auth.signOut();
+}
+
+addTaskBtn.addEventListener("click", addTask);
+loginBtn.addEventListener("click", login);
+logoutBtn.addEventListener("click", logout);
