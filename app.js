@@ -1,6 +1,7 @@
-// No import or export here now
+// Import Firebase setup
+import { auth, provider } from './firebase-config.js';
 
-// Handling the login button click
+// Login button
 const loginButton = document.getElementById('login-btn');
 if (loginButton) {
   loginButton.addEventListener('click', () => {
@@ -8,12 +9,12 @@ if (loginButton) {
       console.log("User signed in:", result.user);
       window.location.href = "dashboard.html";
     }).catch((error) => {
-      console.error("Error during login:", error);
+      console.error("Login Error:", error);
     });
   });
 }
 
-// Handling logout button click
+// Logout button
 const logoutButton = document.getElementById('logout-btn');
 if (logoutButton) {
   logoutButton.addEventListener('click', () => {
@@ -21,20 +22,17 @@ if (logoutButton) {
       console.log("User signed out");
       window.location.href = "index.html";
     }).catch((error) => {
-      console.error("Error during logout:", error);
+      console.error("Logout Error:", error);
     });
   });
 }
 
-// Firebase Auth state change
+// Auth state change
 auth.onAuthStateChanged((user) => {
-  if (user) {
-    if (window.location.pathname.endsWith('index.html')) {
-      window.location.href = "dashboard.html";
-    }
-  } else {
-    if (!window.location.pathname.endsWith('index.html')) {
-      window.location.href = "index.html";
-    }
+  const isLoginPage = window.location.pathname.endsWith('index.html');
+  if (user && isLoginPage) {
+    window.location.href = "dashboard.html";
+  } else if (!user && !isLoginPage) {
+    window.location.href = "index.html";
   }
 });
