@@ -1,32 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Task Manager</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <meta charset="UTF-8">
+  <title>Login | Productivity Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Task Manager</h1>
 
-        <div class="auth-buttons">
-            <button id="loginBtn">Login with Google</button>
-            <button id="logoutBtn" style="display: none;">Logout</button>
-            <button id="themeToggleBtn">Switch Theme</button>
-        </div>
+  <h1>Welcome!</h1>
+  <button id="login-btn">Login with Google</button>
 
-        <div class="add-task">
-            <input type="text" id="taskInput" placeholder="Enter your task">
-            <button id="addTaskBtn">Add Task</button>
-        </div>
+  <button id="logout-btn">Logout</button>
 
-        <ul id="taskList"></ul>
-    </div>
+  <script type="module" src="app.js"></script>
 
-    <script src="app.js"></script>
 </body>
 </html>
