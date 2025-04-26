@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <title>AI Productivity Dashboard</title>
@@ -9,7 +8,6 @@
   <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
   <script defer src="app.js"></script>
 </head>
-
 <body>
   <h1>Productivity Dashboard</h1>
 
@@ -29,6 +27,13 @@
     <ul id="task-list"></ul>
   </div>
 
+  <div id="sticky-notes-section" style="display: none;">
+    <h2>Sticky Notes</h2>
+    <form id="sticky-note-form">
+      <input type="text" id="sticky-note-input" placeholder="Enter your note" required>
+      <button type="submit">Add Sticky Note</button>
+    </form>
+    <div id="sticky-notes-list"></div>
+  </div>
 </body>
-
 </html>
