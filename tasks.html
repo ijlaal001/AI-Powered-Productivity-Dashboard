@@ -7,15 +7,17 @@
 </head>
 <body>
 
-  <h1>Tasks</h1>
-  <ul id="task-list"></ul>
-  <input type="text" id="task-input" placeholder="New Task...">
-  <button id="add-task-btn">Add Task</button>
+  <h1>Tasks Page</h1>
+  <p>Manage your tasks here.</p>
 
   <button id="logout-btn">Logout</button>
 
-  <script type="module" src="app.js"></script>
-  <script src="js/tasks.js"></script>
+  <!-- Firebase scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+
+  <script src="firebase-config.js"></script>
+  <script src="app.js"></script>
 
 </body>
 </html>
