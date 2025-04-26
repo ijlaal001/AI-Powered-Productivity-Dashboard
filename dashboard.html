@@ -8,15 +8,18 @@
 <body>
 
   <h1>Dashboard</h1>
+  <nav>
+    <a href="tasks.html">Tasks</a> |
+    <a href="calendar.html">Calendar</a> |
+    <button id="logout-btn">Logout</button>
+  </nav>
 
-  <a href="clock.html">Flip Clock</a>
-  <a href="tasks.html">Tasks</a>
-  <a href="calendar.html">Google Calendar</a>
+  <!-- Firebase scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 
-  <button id="logout-btn">Logout</button>
-
-  <script type="module" src="app.js"></script>
-  <script src="js/dashboard.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="app.js"></script>
 
 </body>
 </html>
