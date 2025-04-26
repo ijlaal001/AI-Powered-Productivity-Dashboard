@@ -3,18 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <title>AI Productivity Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
   <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
   <script defer src="app.js"></script>
 </head>
 <body>
-  <h1>Productivity Dashboard</h1>
-
   <div id="auth-section">
     <button onclick="signIn()">Sign In with Google</button>
     <button onclick="signOut()" style="display: none;">Sign Out</button>
   </div>
+
+  <h1>Productivity Dashboard</h1>
 
   <div id="task-section" style="display: none;">
     <h2>Add a New Task</h2>
@@ -36,6 +37,5 @@
     </form>
     <ul id="sticky-note-list"></ul>
   </div>
-
 </body>
 </html>
