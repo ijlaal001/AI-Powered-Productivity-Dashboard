@@ -9,7 +9,7 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase app
-const app = firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
 // Function to handle Google Sign-In
