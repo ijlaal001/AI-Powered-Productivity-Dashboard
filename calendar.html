@@ -2,18 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Calendar | Productivity Dashboard</title>
+  <title>Google Calendar | Productivity Dashboard</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
   <h1>Google Calendar</h1>
-  <iframe src="https://calendar.google.com/calendar/embed?src=your_calendar_id&ctz=Asia%2FKolkata" style="border:0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+  
+  <!-- Button to authenticate with Google -->
+  <button id="login-btn">Login with Google</button>
 
+  <!-- Display the calendar using an iframe (Optional) -->
+  <iframe id="calendar-iframe" style="border:0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+
+  <!-- Button to log out -->
   <button id="logout-btn">Logout</button>
 
-  <script type="module" src="app.js"></script>
-  <script src="js/calendar.js"></script>
+  <script src="https://apis.google.com/js/api.js"></script> <!-- Google API client library -->
+  <script type="module" src="calendar.js"></script> <!-- Link to the calendar.js file -->
 
 </body>
 </html>
