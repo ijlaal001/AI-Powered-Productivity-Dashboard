@@ -1,5 +1,4 @@
 // Initialize the Google API client
-console.log('Page Loaded Successfully!')
 function loadCalendarAPI() {
     gapi.load('client:auth2', initClient);
 }
