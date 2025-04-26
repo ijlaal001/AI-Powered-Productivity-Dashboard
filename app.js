@@ -16,11 +16,10 @@ const db = firebase.firestore();
 const signInButton = document.querySelector("#auth-section button:nth-child(1)");
 const signOutButton = document.querySelector("#auth-section button:nth-child(2)");
 const taskSection = document.getElementById("task-section");
+const stickyNoteSection = document.getElementById("sticky-note-section");
 const taskForm = document.getElementById("task-form");
 const taskList = document.getElementById("task-list");
-const stickyNotesSection = document.getElementById("sticky-notes-section");
-const stickyNoteForm = document.getElementById("sticky-note-form");
-const stickyNotesList = document.getElementById("sticky-notes-list");
+const stickyNoteList = document.getElementById("sticky-note-list");
 
 function signIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
@@ -37,7 +36,7 @@ auth.onAuthStateChanged(user => {
     signInButton.style.display = "none";
     signOutButton.style.display = "inline-block";
     taskSection.style.display = "block";
-    stickyNotesSection.style.display = "block";
+    stickyNoteSection.style.display = "block";
     loadTasks();
     loadStickyNotes();
   } else {
@@ -45,9 +44,9 @@ auth.onAuthStateChanged(user => {
     signInButton.style.display = "inline-block";
     signOutButton.style.display = "none";
     taskSection.style.display = "none";
-    stickyNotesSection.style.display = "none";
+    stickyNoteSection.style.display = "none";
     taskList.innerHTML = "";
-    stickyNotesList.innerHTML = "";
+    stickyNoteList.innerHTML = "";
   }
 });
 
@@ -55,8 +54,9 @@ taskForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const taskText = document.getElementById("task-input").value;
   if (taskText.trim() !== "") {
-    const docRef = await db.collection("tasks").add({
+    await db.collection("tasks").add({
       task: taskText,
+      completed: false,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
     taskForm.reset();
@@ -69,28 +69,55 @@ async function loadTasks() {
   const snapshot = await db.collection("tasks").orderBy("timestamp", "desc").get();
   snapshot.forEach(doc => {
     const li = document.createElement("li");
-    const taskText = doc.data().task;
-    li.textContent = taskText;
-
-    // Create delete button for each task
+    li.classList.add("task-item");
+    const taskData = doc.data();
+    const taskText = document.createElement("span");
+    taskText.textContent = taskData.task;
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = taskData.completed;
+    checkbox.onclick = async () => {
+      await db.collection("tasks").doc(doc.id).update({
+        completed: checkbox.checked
+      });
+    };
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     deleteButton.onclick = async () => {
       await db.collection("tasks").doc(doc.id).delete();
       loadTasks();
     };
-
+    const editButton = document.createElement("button");
+    editButton.textContent = "Edit";
+    editButton.onclick = () => {
+      const newTaskText = prompt("Edit task:", taskData.task);
+      if (newTaskText !== null && newTaskText.trim() !== "") {
+        db.collection("tasks").doc(doc.id).update({
+          task: newTaskText
+        });
+        loadTasks();
+      }
+    };
+    li.appendChild(checkbox);
+    li.appendChild(taskText);
+    li.appendChild(editButton);
     li.appendChild(deleteButton);
     taskList.appendChild(li);
   });
 }
 
+// Sticky Notes
+
+const stickyNoteForm = document.getElementById("sticky-note-form");
+const stickyNoteInput = document.getElementById("sticky-note-input");
+
 stickyNoteForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const noteText = document.getElementById("sticky-note-input").value;
-  if (noteText.trim() !== "") {
-    const docRef = await db.collection("stickyNotes").add({
-      note: noteText,
+  const stickyNoteText = stickyNoteInput.value;
+  if (stickyNoteText.trim() !== "") {
+    await db.collection("stickyNotes").add({
+      content: stickyNoteText,
+      priority: "medium",  // Default priority
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
     stickyNoteForm.reset();
@@ -99,15 +126,18 @@ stickyNoteForm.addEventListener("submit", async (e) => {
 });
 
 async function loadStickyNotes() {
-  stickyNotesList.innerHTML = "";
+  stickyNoteList.innerHTML = "";
   const snapshot = await db.collection("stickyNotes").orderBy("timestamp", "desc").get();
   snapshot.forEach(doc => {
-    const note = doc.data().note;
-    const div = document.createElement("div");
-    div.classList.add("sticky-note");
-    div.textContent = note;
+    const noteData = doc.data();
+    const stickyNote = document.createElement("div");
+    stickyNote.classList.add("sticky-note");
+    stickyNote.setAttribute("data-priority", noteData.priority);
 
-    // Create delete button for each sticky note
+    const textarea = document.createElement("textarea");
+    textarea.textContent = noteData.content;
+    stickyNote.appendChild(textarea);
+
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     deleteButton.onclick = async () => {
@@ -115,7 +145,20 @@ async function loadStickyNotes() {
       loadStickyNotes();
     };
 
-    div.appendChild(deleteButton);
-    stickyNotesList.appendChild(div);
+    const priorityButton = document.createElement("button");
+    priorityButton.textContent = "Change Priority";
+    priorityButton.onclick = async () => {
+      const newPriority = prompt("Enter priority (high, medium, low):", noteData.priority);
+      if (newPriority === "high" || newPriority === "medium" || newPriority === "low") {
+        await db.collection("stickyNotes").doc(doc.id).update({
+          priority: newPriority
+        });
+        loadStickyNotes();
+      }
+    };
+
+    stickyNote.appendChild(deleteButton);
+    stickyNote.appendChild(priorityButton);
+    stickyNoteList.appendChild(stickyNote);
   });
 }
