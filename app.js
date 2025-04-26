@@ -1,7 +1,13 @@
 // Initialize Firebase
 const firebaseConfig = {
-    // your firebase config here
+    apiKey: "AIzaSyAHrbrU8BWFB4JEvIsvVquNEEU2EYf3uck",
+    authDomain: "productivity-dashboard-with-ai.firebaseapp.com",
+    projectId: "productivity-dashboard-with-ai",
+    storageBucket: "productivity-dashboard-with-ai.appspot.com",
+    messagingSenderId: "10807938376",
+    appId: "1:10807938376:web:efdda234b5b24821aab77d"
 };
+
 firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
@@ -15,17 +21,13 @@ let logoutBtn = document.getElementById("logoutBtn");
 
 let currentUser = null;
 
-auth.onAuthStateChanged(async function(user)
-{
-    if (user)
-    {
+auth.onAuthStateChanged(async function(user) {
+    if (user) {
         currentUser = user;
         await loadTasks();
         loginBtn.style.display = "none";
         logoutBtn.style.display = "inline-block";
-    }
-    else
-    {
+    } else {
         currentUser = null;
         taskList.innerHTML = "";
         loginBtn.style.display = "inline-block";
@@ -33,20 +35,17 @@ auth.onAuthStateChanged(async function(user)
     }
 });
 
-async function loadTasks()
-{
+async function loadTasks() {
     taskList.innerHTML = "";
 
-    if (!currentUser)
-    {
+    if (!currentUser) {
         return;
     }
 
     let querySnapshot = await db.collection("tasks").where("uid", "==", currentUser.uid).get();
     let tasks = [];
 
-    querySnapshot.forEach(function(doc)
-    {
+    querySnapshot.forEach(function(doc) {
         let data = doc.data();
         tasks.push({
             id: doc.id,
@@ -57,20 +56,17 @@ async function loadTasks()
 
     tasks.sort(comparePriority);
 
-    tasks.forEach(function(task)
-    {
+    tasks.forEach(function(task) {
         addTaskToUI(task.id, task.text, task.priority);
     });
 }
 
-function comparePriority(a, b)
-{
+function comparePriority(a, b) {
     const priorityOrder = { "High": 1, "Medium": 2, "Low": 3 };
     return priorityOrder[a.priority] - priorityOrder[b.priority];
 }
 
-function addTaskToUI(id, text, priority)
-{
+function addTaskToUI(id, text, priority) {
     let li = document.createElement("li");
     li.className = "task-item";
     li.setAttribute("data-id", id);
@@ -84,15 +80,13 @@ function addTaskToUI(id, text, priority)
         <option value="Medium" ${priority === "Medium" ? "selected" : ""}>Medium</option>
         <option value="Low" ${priority === "Low" ? "selected" : ""}>Low</option>
     `;
-    select.addEventListener("change", function()
-    {
+    select.addEventListener("change", function() {
         updatePriority(id, select.value);
     });
 
     let deleteBtn = document.createElement("button");
     deleteBtn.innerText = "Delete";
-    deleteBtn.addEventListener("click", function()
-    {
+    deleteBtn.addEventListener("click", function() {
         deleteTask(id);
     });
 
@@ -102,10 +96,8 @@ function addTaskToUI(id, text, priority)
     taskList.appendChild(li);
 }
 
-async function addTask()
-{
-    if (!currentUser || taskInput.value.trim() === "")
-    {
+async function addTask() {
+    if (!currentUser || taskInput.value.trim() === "") {
         return;
     }
 
@@ -119,10 +111,8 @@ async function addTask()
     taskInput.value = "";
 }
 
-async function updatePriority(id, newPriority)
-{
-    if (!currentUser)
-    {
+async function updatePriority(id, newPriority) {
+    if (!currentUser) {
         return;
     }
 
@@ -133,10 +123,8 @@ async function updatePriority(id, newPriority)
     await loadTasks();
 }
 
-async function deleteTask(id)
-{
-    if (!currentUser)
-    {
+async function deleteTask(id) {
+    if (!currentUser) {
         return;
     }
 
@@ -144,14 +132,12 @@ async function deleteTask(id)
     await loadTasks();
 }
 
-function login()
-{
+function login() {
     let provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider);
 }
 
-function logout()
-{
+function logout() {
     auth.signOut();
 }
 
