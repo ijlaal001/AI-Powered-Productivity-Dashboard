@@ -7,95 +7,6 @@
   <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
   <script defer src="app.js"></script>
-  <style>
-    /* Sticky Note Styles */
-    .sticky-note {
-      width: 200px;
-      height: 200px;
-      margin: 10px;
-      padding: 10px;
-      display: inline-block;
-      background-color: lightyellow;
-      border: 2px solid black;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-    .sticky-note[data-priority="high"] {
-      background-color: lightcoral;
-    }
-    .sticky-note[data-priority="medium"] {
-      background-color: lightgoldenrodyellow;
-    }
-    .sticky-note[data-priority="low"] {
-      background-color: lightgreen;
-    }
-    .sticky-note textarea {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background-color: transparent;
-      resize: none;
-    }
-
-    .task-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 5px;
-      margin-bottom: 10px;
-      background-color: #f0f0f0;
-      border-radius: 5px;
-    }
-
-    /* Task List Style */
-    #task-list {
-      list-style-type: none;
-      padding: 0;
-    }
-
-    /* Sticky Notes Section */
-    #sticky-note-list {
-      display: flex;
-      flex-wrap: wrap;
-    }
-
-    /* Modal / Popup Styles */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.4);
-      overflow: auto;
-    }
-    .modal-content {
-      background-color: white;
-      padding: 20px;
-      border-radius: 10px;
-      width: 300px;
-      margin: 15% auto;
-    }
-    .close {
-      color: #aaa;
-      font-size: 28px;
-      font-weight: bold;
-      float: right;
-      cursor: pointer;
-    }
-    .close:hover,
-    .close:focus {
-      color: black;
-      text-decoration: none;
-    }
-    .priority-select {
-      margin-bottom: 10px;
-      padding: 5px;
-      width: 100%;
-    }
-  </style>
 </head>
 <body>
   <h1>Productivity Dashboard</h1>
@@ -116,29 +27,14 @@
     <ul id="task-list"></ul>
   </div>
 
-  <div id="sticky-note-section" style="display: none;">
-    <h2>Add a New Sticky Note</h2>
+  <!-- Sticky Notes Section -->
+  <div id="sticky-notes-section" style="display: none;">
+    <h2>Sticky Notes</h2>
     <form id="sticky-note-form">
-      <input type="text" id="sticky-note-input" placeholder="Enter your sticky note" required>
+      <input type="text" id="sticky-note-input" placeholder="Enter a sticky note" required>
       <button type="submit">Add Sticky Note</button>
     </form>
-
-    <h2>Your Sticky Notes</h2>
-    <div id="sticky-note-list"></div>
-  </div>
-
-  <!-- Modal for Editing and Changing Priority -->
-  <div id="priority-modal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h3>Change Sticky Note Priority</h3>
-      <select id="priority-select" class="priority-select">
-        <option value="low">Low</option>
-        <option value="medium">Medium</option>
-        <option value="high">High</option>
-      </select>
-      <button id="save-priority" style="width: 100%;">Save</button>
-    </div>
+    <ul id="sticky-note-list"></ul>
   </div>
 
 </body>
