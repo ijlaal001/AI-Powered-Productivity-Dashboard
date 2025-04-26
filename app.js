@@ -1,4 +1,9 @@
-// Initialize Firebase
+// Import Firebase functions
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, orderBy, query } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js";
+
+// Firebase config
 const firebaseConfig = {
     apiKey: "AIzaSyAHrbrU8BWFB4JEvIsvVquNEEU2EYf3uck",
     authDomain: "productivity-dashboard-with-ai.firebaseapp.com",
@@ -7,14 +12,16 @@ const firebaseConfig = {
     messagingSenderId: "10807938376",
     appId: "1:10807938376:web:efdda234b5b24821aab77d"
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 // Sign In Function
 function signIn() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
         .then((result) => {
             const user = result.user;
             console.log("Signed in as:", user.displayName);
@@ -32,13 +39,17 @@ function signIn() {
 
 // Sign Out Function
 function signOut() {
-    auth.signOut().then(() => {
-        document.getElementById("signInButton").style.display = "block";
-        document.getElementById("signOutButton").style.display = "none";
-        document.getElementById("task-section").style.display = "none";
-        document.getElementById("notes-section").style.display = "none";
-        console.log("Signed out!");
-    });
+    firebaseSignOut(auth)
+        .then(() => {
+            document.getElementById("signInButton").style.display = "block";
+            document.getElementById("signOutButton").style.display = "none";
+            document.getElementById("task-section").style.display = "none";
+            document.getElementById("notes-section").style.display = "none";
+            console.log("Signed out!");
+        })
+        .catch((error) => {
+            console.error("Error during sign-out:", error);
+        });
 }
 
 // --- Task Functions ---
@@ -47,10 +58,10 @@ function addTask() {
     if (taskText.trim() !== "") {
         const user = auth.currentUser;
         if (user) {
-            const tasksRef = db.collection("users").doc(user.uid).collection("tasks");
-            tasksRef.add({
+            const tasksRef = collection(db, "users", user.uid, "tasks");
+            addDoc(tasksRef, {
                 text: taskText,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                timestamp: new Date()
             })
             .then(() => {
                 console.log("Task added!");
@@ -67,29 +78,34 @@ function addTask() {
 function loadTasks() {
     const user = auth.currentUser;
     if (user) {
-        const tasksRef = db.collection("users").doc(user.uid).collection("tasks").orderBy("timestamp", "desc");
-        tasksRef.get().then((querySnapshot) => {
-            const taskList = document.getElementById("taskList");
-            taskList.innerHTML = "";
-            querySnapshot.forEach((doc) => {
-                const taskItem = document.createElement("li");
-                taskItem.textContent = doc.data().text;
-                const deleteButton = document.createElement("button");
-                deleteButton.textContent = "Delete";
-                deleteButton.classList.add("delete-btn");
-                deleteButton.onclick = () => deleteTask(doc.id);
-                taskItem.appendChild(deleteButton);
-                taskList.appendChild(taskItem);
+        const tasksRef = collection(db, "users", user.uid, "tasks");
+        const tasksQuery = query(tasksRef, orderBy("timestamp", "desc"));
+        getDocs(tasksQuery)
+            .then((querySnapshot) => {
+                const taskList = document.getElementById("taskList");
+                taskList.innerHTML = "";
+                querySnapshot.forEach((doc) => {
+                    const taskItem = document.createElement("li");
+                    taskItem.textContent = doc.data().text;
+                    const deleteButton = document.createElement("button");
+                    deleteButton.textContent = "Delete";
+                    deleteButton.classList.add("delete-btn");
+                    deleteButton.onclick = () => deleteTask(doc.id);
+                    taskItem.appendChild(deleteButton);
+                    taskList.appendChild(taskItem);
+                });
+            })
+            .catch((error) => {
+                console.error("Error loading tasks: ", error);
             });
-        });
     }
 }
 
 function deleteTask(taskId) {
     const user = auth.currentUser;
     if (user) {
-        const taskRef = db.collection("users").doc(user.uid).collection("tasks").doc(taskId);
-        taskRef.delete()
+        const taskRef = doc(db, "users", user.uid, "tasks", taskId);
+        deleteDoc(taskRef)
             .then(() => {
                 console.log("Task deleted!");
                 loadTasks();
@@ -106,10 +122,10 @@ function addNote() {
     if (noteText.trim() !== "") {
         const user = auth.currentUser;
         if (user) {
-            const notesRef = db.collection("users").doc(user.uid).collection("notes");
-            notesRef.add({
+            const notesRef = collection(db, "users", user.uid, "notes");
+            addDoc(notesRef, {
                 text: noteText,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                timestamp: new Date()
             })
             .then(() => {
                 console.log("Note added!");
@@ -126,37 +142,20 @@ function addNote() {
 function loadNotes() {
     const user = auth.currentUser;
     if (user) {
-        const notesRef = db.collection("users").doc(user.uid).collection("notes").orderBy("timestamp", "desc");
-        notesRef.get().then((querySnapshot) => {
-            const noteList = document.getElementById("noteList");
-            noteList.innerHTML = "";
-            querySnapshot.forEach((doc) => {
-                const noteItem = document.createElement("li");
-                noteItem.textContent = doc.data().text;
-
-                const deleteButton = document.createElement("button");
-                deleteButton.textContent = "Delete";
-                deleteButton.classList.add("delete-btn");
-                deleteButton.onclick = () => deleteNote(doc.id);
-
-                noteItem.appendChild(deleteButton);
-                noteList.appendChild(noteItem);
-            });
-        });
-    }
-}
-
-function deleteNote(noteId) {
-    const user = auth.currentUser;
-    if (user) {
-        const noteRef = db.collection("users").doc(user.uid).collection("notes").doc(noteId);
-        noteRef.delete()
-            .then(() => {
-                console.log("Note deleted!");
-                loadNotes();
+        const notesRef = collection(db, "users", user.uid, "notes");
+        const notesQuery = query(notesRef, orderBy("timestamp", "desc"));
+        getDocs(notesQuery)
+            .then((querySnapshot) => {
+                const noteList = document.getElementById("noteList");
+                noteList.innerHTML = "";
+                querySnapshot.forEach((doc) => {
+                    const noteItem = document.createElement("li");
+                    noteItem.textContent = doc.data().text;
+                    noteList.appendChild(noteItem);
+                });
             })
             .catch((error) => {
-                console.error("Error deleting note: ", error);
+                console.error("Error loading notes: ", error);
             });
     }
 }
