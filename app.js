@@ -69,23 +69,35 @@ taskForm.addEventListener("submit", async (e) => {
 });
 
 async function loadTasks() {
+  console.log("Loading tasks...");
   taskList.innerHTML = "";
-  const snapshot = await db.collection("tasks").orderBy("timestamp", "desc").get();
-  snapshot.forEach(doc => {
-    const li = document.createElement("li");
-    li.classList.add("task-item");
-    li.textContent = doc.data().task;
+  
+  try {
+    const snapshot = await db.collection("tasks").orderBy("timestamp", "desc").get();
+    
+    if (snapshot.empty) {
+      console.log("No tasks found.");
+    }
+    
+    snapshot.forEach(doc => {
+      console.log("Loaded task:", doc.data());
+      const li = document.createElement("li");
+      li.classList.add("task-item");
+      li.textContent = doc.data().task;
 
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
-    deleteButton.onclick = async () => {
-      await db.collection("tasks").doc(doc.id).delete();
-      loadTasks();
-    };
+      const deleteButton = document.createElement("button");
+      deleteButton.textContent = "Delete";
+      deleteButton.onclick = async () => {
+        await db.collection("tasks").doc(doc.id).delete();
+        loadTasks();
+      };
 
-    li.appendChild(deleteButton);
-    taskList.appendChild(li);
-  });
+      li.appendChild(deleteButton);
+      taskList.appendChild(li);
+    });
+  } catch (error) {
+    console.error("Error loading tasks:", error);
+  }
 }
 
 stickyNoteForm.addEventListener("submit", async (e) => {
@@ -105,28 +117,33 @@ stickyNoteForm.addEventListener("submit", async (e) => {
 async function loadStickyNotes() {
   console.log("Loading sticky notes...");
   stickyNoteList.innerHTML = "";
-  const snapshot = await db.collection("sticky-notes").orderBy("timestamp", "desc").get();
+  
+  try {
+    const snapshot = await db.collection("sticky-notes").orderBy("timestamp", "desc").get();
+    
+    if (snapshot.empty) {
+      console.log("No sticky notes found.");
+    }
+    
+    snapshot.forEach(doc => {
+      console.log("Loaded sticky note:", doc.data());
+      const div = document.createElement("div");
+      div.classList.add("sticky-note");
+      div.setAttribute("data-id", doc.id);
+      div.setAttribute("data-priority", doc.data().priority);
+      div.textContent = doc.data().note;
 
-  if (snapshot.empty) {
-    console.log("No sticky notes found.");
-  }
+      // Add click event to open the priority change modal
+      div.addEventListener("click", () => {
+        currentStickyNoteId = doc.id;
+        priorityModal.style.display = "block";
+      });
 
-  snapshot.forEach(doc => {
-    console.log("Loaded sticky note:", doc.data());
-    const div = document.createElement("div");
-    div.classList.add("sticky-note");
-    div.setAttribute("data-id", doc.id);
-    div.setAttribute("data-priority", doc.data().priority);
-    div.textContent = doc.data().note;
-
-    // Add click event to open the priority change modal
-    div.addEventListener("click", () => {
-      currentStickyNoteId = doc.id;
-      priorityModal.style.display = "block";
+      stickyNoteList.appendChild(div);
     });
-
-    stickyNoteList.appendChild(div);
-  });
+  } catch (error) {
+    console.error("Error loading sticky notes:", error);
+  }
 }
 
 closeModal.addEventListener("click", () => {
