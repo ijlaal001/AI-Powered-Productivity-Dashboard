@@ -7,20 +7,21 @@ const firebaseConfig = {
     messagingSenderId: "10807938376",
     appId: "1:10807938376:web:efdda234b5b24821aab77d"
 };
-
 firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 const auth = firebase.auth();
 
+// Variables
 let taskInput = document.getElementById("taskInput");
 let taskList = document.getElementById("taskList");
 let addTaskBtn = document.getElementById("addTaskBtn");
 let loginBtn = document.getElementById("loginBtn");
 let logoutBtn = document.getElementById("logoutBtn");
-
+let themeToggleBtn = document.getElementById("themeToggleBtn");
 let currentUser = null;
 
+// Auth State Change
 auth.onAuthStateChanged(async function(user) {
     if (user) {
         currentUser = user;
@@ -35,6 +36,7 @@ auth.onAuthStateChanged(async function(user) {
     }
 });
 
+// Load Tasks
 async function loadTasks() {
     taskList.innerHTML = "";
 
@@ -61,11 +63,13 @@ async function loadTasks() {
     });
 }
 
+// Compare Priority
 function comparePriority(a, b) {
     const priorityOrder = { "High": 1, "Medium": 2, "Low": 3 };
     return priorityOrder[a.priority] - priorityOrder[b.priority];
 }
 
+// Add Task to UI
 function addTaskToUI(id, text, priority) {
     let li = document.createElement("li");
     li.className = "task-item";
@@ -96,6 +100,7 @@ function addTaskToUI(id, text, priority) {
     taskList.appendChild(li);
 }
 
+// Add Task
 async function addTask() {
     if (!currentUser || taskInput.value.trim() === "") {
         return;
@@ -111,6 +116,7 @@ async function addTask() {
     taskInput.value = "";
 }
 
+// Update Priority
 async function updatePriority(id, newPriority) {
     if (!currentUser) {
         return;
@@ -123,6 +129,7 @@ async function updatePriority(id, newPriority) {
     await loadTasks();
 }
 
+// Delete Task
 async function deleteTask(id) {
     if (!currentUser) {
         return;
@@ -132,15 +139,36 @@ async function deleteTask(id) {
     await loadTasks();
 }
 
+// Login
 function login() {
     let provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider);
 }
 
+// Logout
 function logout() {
     auth.signOut();
 }
 
+// Event Listeners
 addTaskBtn.addEventListener("click", addTask);
 loginBtn.addEventListener("click", login);
 logoutBtn.addEventListener("click", logout);
+
+// Theme Toggle
+if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark");
+    themeToggleBtn.innerText = "Switch to Light Mode";
+}
+
+themeToggleBtn.addEventListener("click", function() {
+    document.body.classList.toggle("dark");
+
+    if (document.body.classList.contains("dark")) {
+        localStorage.setItem("theme", "dark");
+        themeToggleBtn.innerText = "Switch to Light Mode";
+    } else {
+        localStorage.setItem("theme", "light");
+        themeToggleBtn.innerText = "Switch to Dark Mode";
+    }
+});
