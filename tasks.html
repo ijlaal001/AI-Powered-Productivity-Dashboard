@@ -2,22 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Tasks | Productivity Dashboard</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>Tasks</title>
+  <script type="module" src="./tasks.js" defer></script>
+  <link rel="stylesheet" href="assets/style.css">
 </head>
-<body>
-
-  <h1>Tasks Page</h1>
-  <p>Manage your tasks here.</p>
-
-  <button id="logout-btn">Logout</button>
-
-  <!-- Firebase scripts -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-
-  <script src="firebase-config.js"></script>
-  <script src="app.js"></script>
-
+<body class="bg-gray-900 text-white p-4">
+  <h1 class="text-2xl mb-4">My Tasks</h1>
+  <input id="task-input" type="text" placeholder="Enter a task" class="p-2 rounded mb-2 text-black">
+  <button id="add-task-btn" class="bg-green-600 px-4 py-2 rounded mb-4">Add Task</button>
+  <button id="logout-btn" class="bg-red-600 px-4 py-2 rounded ml-2">Logout</button>
+  <ul id="tasks-list" class="mt-4"></ul>
 </body>
 </html>
