@@ -1,4 +1,4 @@
-// Your web app's Firebase configuration
+// Your Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyAHrbrU8BWFB4JEvIsvVquNEEU2EYf3uck",
     authDomain: "productivity-dashboard-with-ai.firebaseapp.com",
@@ -11,21 +11,76 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Initialize Firebase Authentication
+// Firebase services
 const auth = firebase.auth();
+const db = firebase.firestore();
 
-// Sign in with Google function
-function signIn() {
+// Elements
+const signInButton = document.getElementById('signInButton');
+const signOutButton = document.getElementById('signOutButton');
+const userInfo = document.getElementById('userInfo');
+const taskForm = document.getElementById('taskForm');
+const taskInput = document.getElementById('taskInput');
+const taskList = document.getElementById('taskList');
+
+let user = null;
+
+// Sign in
+signInButton.onclick = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
-        .then((result) => {
-            const user = result.user;
-            console.log("Signed in as:", user.displayName);
-        })
-        .catch((error) => {
-            console.error("Error signing in:", error.message);
-        });
-}
+    auth.signInWithPopup(provider);
+};
 
-// Attach signIn to button
-document.getElementById("sign-in-button").addEventListener("click", signIn);
+// Sign out
+signOutButton.onclick = () => {
+    auth.signOut();
+};
+
+// Auth state
+auth.onAuthStateChanged((u) => {
+    if (u) {
+        user = u;
+        userInfo.innerText = `Signed in as: ${u.displayName}`;
+        signInButton.style.display = "none";
+        signOutButton.style.display = "inline";
+        loadTasks();
+    } else {
+        user = null;
+        userInfo.innerText = "Not signed in";
+        signInButton.style.display = "inline";
+        signOutButton.style.display = "none";
+        taskList.innerHTML = "";
+    }
+});
+
+// Add task
+taskForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const task = taskInput.value.trim();
+    if (task && user) {
+        db.collection('users').doc(user.uid).collection('tasks').add({
+            text: task,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+            taskInput.value = '';
+            loadTasks();
+        }).catch((error) => {
+            console.error("Error adding task: ", error);
+        });
+    }
+});
+
+// Load tasks
+function loadTasks() {
+    if (user) {
+        db.collection('users').doc(user.uid).collection('tasks').orderBy('createdAt', 'desc').get()
+        .then(snapshot => {
+            taskList.innerHTML = "";
+            snapshot.forEach(doc => {
+                const li = document.createElement('li');
+                li.textContent = doc.data().text;
+                taskList.appendChild(li);
+            });
+        });
+    }
+}
