@@ -103,15 +103,23 @@ stickyNoteForm.addEventListener("submit", async (e) => {
 });
 
 async function loadStickyNotes() {
+  console.log("Loading sticky notes...");
   stickyNoteList.innerHTML = "";
   const snapshot = await db.collection("sticky-notes").orderBy("timestamp", "desc").get();
+
+  if (snapshot.empty) {
+    console.log("No sticky notes found.");
+  }
+
   snapshot.forEach(doc => {
+    console.log("Loaded sticky note:", doc.data());
     const div = document.createElement("div");
     div.classList.add("sticky-note");
     div.setAttribute("data-id", doc.id);
     div.setAttribute("data-priority", doc.data().priority);
     div.textContent = doc.data().note;
 
+    // Add click event to open the priority change modal
     div.addEventListener("click", () => {
       currentStickyNoteId = doc.id;
       priorityModal.style.display = "block";
