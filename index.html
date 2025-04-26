@@ -2,20 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI-Powered Productivity Dashboard</title>
-
-    <!-- Correct Firebase CDN scripts (Compat versions) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <title>AI Productivity Dashboard</title>
 </head>
 <body>
-    <h1>Welcome to the AI-Powered Productivity Dashboard</h1>
+    <h1>Productivity Dashboard</h1>
 
-    <button id="sign-in-button">Sign In with Google</button>
+    <button id="signInButton">Sign In with Google</button>
+    <button id="signOutButton" style="display: none;">Sign Out</button>
+    <p id="userInfo"></p>
 
-    <!-- Link to your app.js -->
+    <h2>Add a Task</h2>
+    <form id="taskForm">
+        <input type="text" id="taskInput" placeholder="Enter your task" required>
+        <button type="submit">Add Task</button>
+    </form>
+
+    <h2>Your Tasks</h2>
+    <ul id="taskList"></ul>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
