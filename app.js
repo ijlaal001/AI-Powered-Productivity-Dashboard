@@ -57,6 +57,7 @@ taskForm.addEventListener("submit", async (e) => {
   if (taskText.trim() !== "") {
     await db.collection("tasks").add({
       task: taskText,
+      completed: false,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
     taskForm.reset();
@@ -69,7 +70,43 @@ async function loadTasks() {
   const snapshot = await db.collection("tasks").orderBy("timestamp", "desc").get();
   snapshot.forEach(doc => {
     const li = document.createElement("li");
-    li.textContent = doc.data().task;
+    const taskData = doc.data();
+    li.classList.add("task-item");
+    
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = taskData.completed;
+    checkbox.addEventListener("change", async () => {
+      await db.collection("tasks").doc(doc.id).update({
+        completed: checkbox.checked
+      });
+    });
+
+    const taskText = document.createElement("span");
+    taskText.textContent = taskData.task;
+    taskText.classList.add(taskData.completed ? "completed" : "");
+
+    const editButton = document.createElement("button");
+    editButton.textContent = "Edit";
+    editButton.addEventListener("click", async () => {
+      const newTask = prompt("Edit your task", taskData.task);
+      if (newTask) {
+        await db.collection("tasks").doc(doc.id).update({ task: newTask });
+        loadTasks();
+      }
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", async () => {
+      await db.collection("tasks").doc(doc.id).delete();
+      loadTasks();
+    });
+
+    li.appendChild(checkbox);
+    li.appendChild(taskText);
+    li.appendChild(editButton);
+    li.appendChild(deleteButton);
     taskList.appendChild(li);
   });
 }
@@ -94,7 +131,38 @@ async function loadStickyNotes() {
   const snapshot = await db.collection("sticky-notes").orderBy("timestamp", "desc").get();
   snapshot.forEach(doc => {
     const li = document.createElement("li");
-    li.textContent = doc.data().note;
+    const noteData = doc.data();
+    li.classList.add("sticky-note-item");
+
+    const prioritySelect = document.createElement("select");
+    const options = ["low", "medium", "high"];
+    options.forEach(priority => {
+      const option = document.createElement("option");
+      option.value = priority;
+      option.textContent = priority;
+      if (noteData.priority === priority) option.selected = true;
+      prioritySelect.appendChild(option);
+    });
+    
+    prioritySelect.addEventListener("change", async () => {
+      await db.collection("sticky-notes").doc(doc.id).update({
+        priority: prioritySelect.value
+      });
+    });
+
+    const noteText = document.createElement("span");
+    noteText.textContent = noteData.note;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", async () => {
+      await db.collection("sticky-notes").doc(doc.id).delete();
+      loadStickyNotes();
+    });
+
+    li.appendChild(prioritySelect);
+    li.appendChild(noteText);
+    li.appendChild(deleteButton);
     stickyNoteList.appendChild(li);
   });
 }
