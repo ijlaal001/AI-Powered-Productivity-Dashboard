@@ -1,5 +1,4 @@
-// Import Firebase setup from firebase-config.js
-import { auth, provider } from './firebase-config.js';
+// No import or export here now
 
 // Handling the login button click
 const loginButton = document.getElementById('login-btn');
@@ -7,8 +6,7 @@ if (loginButton) {
   loginButton.addEventListener('click', () => {
     auth.signInWithPopup(provider).then((result) => {
       console.log("User signed in:", result.user);
-      // Redirect to dashboard after login
-      window.location.href = "dashboard.html";  // Ensure this points to your dashboard page
+      window.location.href = "dashboard.html";
     }).catch((error) => {
       console.error("Error during login:", error);
     });
@@ -21,25 +19,22 @@ if (logoutButton) {
   logoutButton.addEventListener('click', () => {
     auth.signOut().then(() => {
       console.log("User signed out");
-      // Redirect to login page after logout
-      window.location.href = "index.html";  // Redirect back to login page
+      window.location.href = "index.html";
     }).catch((error) => {
       console.error("Error during logout:", error);
     });
   });
 }
 
-// Firebase Auth state change (handle redirects)
+// Firebase Auth state change
 auth.onAuthStateChanged((user) => {
   if (user) {
-    // If user is authenticated, redirect to dashboard
     if (window.location.pathname.endsWith('index.html')) {
-      window.location.href = "dashboard.html"; // This redirects to the dashboard if the user is logged in
+      window.location.href = "dashboard.html";
     }
   } else {
-    // If user is not authenticated, redirect to login page (if not already on login page)
     if (!window.location.pathname.endsWith('index.html')) {
-      window.location.href = "index.html"; // Ensure the user is redirected back to the login page if not authenticated
+      window.location.href = "index.html";
     }
   }
 });
