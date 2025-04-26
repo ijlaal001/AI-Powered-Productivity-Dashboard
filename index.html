@@ -1,101 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Productivity Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-powered Productivity Dashboard</title>
+  <!-- Firebase SDK -->
+  <script type="module" src="app.js"></script>
 </head>
-
 <body>
-    <h1>AI Productivity Dashboard</h1>
-
-    <!-- Google Login Button -->
-    <button id="google-login-btn">Login with Google</button>
-
-    <!-- To-Do List Section -->
-    <div id="todo">
-        <h2>To-Do Assistant</h2>
-        <input type="text" id="task-input" placeholder="Enter a task" />
-        <button id="add-task-btn">Add Task</button>
-        <ul id="task-list"></ul>
-    </div>
-
-    <script type="module">
-        // Import Firebase SDK
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCl6IUeUlkrdb5hcw8dn6HgHmdvoVXc_jQ",
-            authDomain: "ai-productivity-dashboard.firebaseapp.com",
-            projectId: "ai-productivity-dashboard",
-            storageBucket: "ai-productivity-dashboard.firebasestorage.app",
-            messagingSenderId: "828472395583",
-            appId: "1:828472395583:web:8fb95057ff924c44aeb58a",
-            measurementId: "G-JYLP75THVV"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-
-        // Google Sign-In Function
-        async function googleLogin() {
-            try {
-                const result = await signInWithPopup(auth, provider);
-                const user = result.user;
-                console.log('Logged in as: ', user.displayName);
-                // Optionally, store user data or redirect
-            } catch (error) {
-                console.error("Error signing in: ", error);
-            }
-        }
-
-        document.getElementById("google-login-btn").addEventListener("click", googleLogin);
-
-        // Function to add a task to Firestore
-        async function addTask(task) {
-            try {
-                const docRef = await addDoc(collection(db, "tasks"), {
-                    taskName: task,
-                    timestamp: new Date(),
-                });
-                console.log("Task added with ID: ", docRef.id);
-                loadTasks(); // Refresh tasks
-            } catch (e) {
-                console.error("Error adding task: ", e);
-            }
-        }
-
-        // Function to load tasks from Firestore
-        async function loadTasks() {
-            const taskList = document.getElementById("task-list");
-            taskList.innerHTML = ''; // Clear existing tasks
-            const querySnapshot = await getDocs(collection(db, "tasks"));
-            querySnapshot.forEach((doc) => {
-                const li = document.createElement("li");
-                li.textContent = doc.data().taskName;
-                taskList.appendChild(li);
-            });
-        }
-
-        // Event listener for adding a task
-        document.getElementById("add-task-btn").addEventListener("click", () => {
-            const taskInput = document.getElementById("task-input");
-            if (taskInput.value) {
-                addTask(taskInput.value);
-                taskInput.value = ''; // Clear input after adding task
-            }
-        });
-
-        // Load tasks when page is loaded
-        loadTasks();
-    </script>
+  <h1>Welcome to Your Productivity Dashboard!</h1>
+  <button onclick="signIn()">Sign In with Google</button>
 </body>
-
 </html>
