@@ -16,10 +16,15 @@ const db = firebase.firestore();
 const signInButton = document.querySelector("#auth-section button:nth-child(1)");
 const signOutButton = document.querySelector("#auth-section button:nth-child(2)");
 const taskSection = document.getElementById("task-section");
-const stickyNoteSection = document.getElementById("sticky-note-section");
 const taskForm = document.getElementById("task-form");
 const taskList = document.getElementById("task-list");
+const stickyNoteForm = document.getElementById("sticky-note-form");
 const stickyNoteList = document.getElementById("sticky-note-list");
+const priorityModal = document.getElementById("priority-modal");
+const closeModal = document.querySelector(".close");
+const prioritySelect = document.getElementById("priority-select");
+const savePriorityButton = document.getElementById("save-priority");
+let currentStickyNoteId = null;
 
 function signIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
@@ -36,7 +41,7 @@ auth.onAuthStateChanged(user => {
     signInButton.style.display = "none";
     signOutButton.style.display = "inline-block";
     taskSection.style.display = "block";
-    stickyNoteSection.style.display = "block";
+    stickyNoteForm.style.display = "block";
     loadTasks();
     loadStickyNotes();
   } else {
@@ -44,9 +49,9 @@ auth.onAuthStateChanged(user => {
     signInButton.style.display = "inline-block";
     signOutButton.style.display = "none";
     taskSection.style.display = "none";
-    stickyNoteSection.style.display = "none";
-    taskList.innerHTML = "";
+    stickyNoteForm.style.display = "none";
     stickyNoteList.innerHTML = "";
+    taskList.innerHTML = "";
   }
 });
 
@@ -56,7 +61,6 @@ taskForm.addEventListener("submit", async (e) => {
   if (taskText.trim() !== "") {
     await db.collection("tasks").add({
       task: taskText,
-      completed: false,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
     taskForm.reset();
@@ -70,54 +74,27 @@ async function loadTasks() {
   snapshot.forEach(doc => {
     const li = document.createElement("li");
     li.classList.add("task-item");
-    const taskData = doc.data();
-    const taskText = document.createElement("span");
-    taskText.textContent = taskData.task;
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = taskData.completed;
-    checkbox.onclick = async () => {
-      await db.collection("tasks").doc(doc.id).update({
-        completed: checkbox.checked
-      });
-    };
+    li.textContent = doc.data().task;
+
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     deleteButton.onclick = async () => {
       await db.collection("tasks").doc(doc.id).delete();
       loadTasks();
     };
-    const editButton = document.createElement("button");
-    editButton.textContent = "Edit";
-    editButton.onclick = () => {
-      const newTaskText = prompt("Edit task:", taskData.task);
-      if (newTaskText !== null && newTaskText.trim() !== "") {
-        db.collection("tasks").doc(doc.id).update({
-          task: newTaskText
-        });
-        loadTasks();
-      }
-    };
-    li.appendChild(checkbox);
-    li.appendChild(taskText);
-    li.appendChild(editButton);
+
     li.appendChild(deleteButton);
     taskList.appendChild(li);
   });
 }
 
-// Sticky Notes
-
-const stickyNoteForm = document.getElementById("sticky-note-form");
-const stickyNoteInput = document.getElementById("sticky-note-input");
-
 stickyNoteForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const stickyNoteText = stickyNoteInput.value;
-  if (stickyNoteText.trim() !== "") {
-    await db.collection("stickyNotes").add({
-      content: stickyNoteText,
-      priority: "medium",  // Default priority
+  const noteText = document.getElementById("sticky-note-input").value;
+  if (noteText.trim() !== "") {
+    await db.collection("sticky-notes").add({
+      note: noteText,
+      priority: "low",
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
     stickyNoteForm.reset();
@@ -127,38 +104,30 @@ stickyNoteForm.addEventListener("submit", async (e) => {
 
 async function loadStickyNotes() {
   stickyNoteList.innerHTML = "";
-  const snapshot = await db.collection("stickyNotes").orderBy("timestamp", "desc").get();
+  const snapshot = await db.collection("sticky-notes").orderBy("timestamp", "desc").get();
   snapshot.forEach(doc => {
-    const noteData = doc.data();
-    const stickyNote = document.createElement("div");
-    stickyNote.classList.add("sticky-note");
-    stickyNote.setAttribute("data-priority", noteData.priority);
+    const div = document.createElement("div");
+    div.classList.add("sticky-note");
+    div.setAttribute("data-id", doc.id);
+    div.setAttribute("data-priority", doc.data().priority);
+    div.textContent = doc.data().note;
 
-    const textarea = document.createElement("textarea");
-    textarea.textContent = noteData.content;
-    stickyNote.appendChild(textarea);
+    div.addEventListener("click", () => {
+      currentStickyNoteId = doc.id;
+      priorityModal.style.display = "block";
+    });
 
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
-    deleteButton.onclick = async () => {
-      await db.collection("stickyNotes").doc(doc.id).delete();
-      loadStickyNotes();
-    };
-
-    const priorityButton = document.createElement("button");
-    priorityButton.textContent = "Change Priority";
-    priorityButton.onclick = async () => {
-      const newPriority = prompt("Enter priority (high, medium, low):", noteData.priority);
-      if (newPriority === "high" || newPriority === "medium" || newPriority === "low") {
-        await db.collection("stickyNotes").doc(doc.id).update({
-          priority: newPriority
-        });
-        loadStickyNotes();
-      }
-    };
-
-    stickyNote.appendChild(deleteButton);
-    stickyNote.appendChild(priorityButton);
-    stickyNoteList.appendChild(stickyNote);
+    stickyNoteList.appendChild(div);
   });
 }
+
+closeModal.addEventListener("click", () => {
+  priorityModal.style.display = "none";
+});
+
+savePriorityButton.addEventListener("click", async () => {
+  const priority = prioritySelect.value;
+  await db.collection("sticky-notes").doc(currentStickyNoteId).update({ priority });
+  priorityModal.style.display = "none";
+  loadStickyNotes();
+});
