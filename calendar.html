@@ -1,29 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Calendar | Productivity Dashboard</title>
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar - Productivity Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- Google API Client Library -->
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+
+    <!-- Your custom JavaScript -->
+    <script type="module" src="./calendar.js"></script>
 </head>
-<body>
+<body class="bg-gradient-to-br from-gray-900 to-gray-700 min-h-screen flex flex-col text-white">
 
-  <h1>Google Calendar</h1>
+    <header class="p-4 flex justify-between items-center">
+        <h1 class="text-3xl font-bold">Calendar</h1>
+        <button id="logout-btn" class="px-4 py-2 bg-red-600 rounded-2xl hover:bg-red-700 transition">Logout</button>
+    </header>
 
-  <div id="authorize_button" style="display: none;">Authorize</div>
-  <div id="signout_button" style="display: none;">Sign Out</div>
-  <pre id="content" style="white-space: pre-wrap;"></pre>
-
-  <button id="logout-btn">Logout</button>
-
-  <!-- Firebase scripts -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-
-  <script src="https://apis.google.com/js/api.js"></script> <!-- Google API -->
-  
-  <script src="firebase-config.js"></script>
-  <script src="app.js"></script>
-  <script src="js/calendar.js"></script>
+    <main class="flex-grow p-8 flex flex-col items-center">
+        <h2 class="text-2xl mb-4">Your Google Calendar</h2>
+        <div id="calendar-events" class="w-full max-w-4xl space-y-4"></div>
+    </main>
 
 </body>
 </html>
