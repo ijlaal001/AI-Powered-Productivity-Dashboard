@@ -1,41 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>AI Productivity Dashboard</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
-  <script defer src="app.js"></script>
+    <meta charset="UTF-8">
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="auth-section">
-    <button onclick="signIn()">Sign In with Google</button>
-    <button onclick="signOut()" style="display: none;">Sign Out</button>
-  </div>
+    <div class="container">
+        <h1>Task Manager</h1>
 
-  <h1>Productivity Dashboard</h1>
+        <div class="auth-buttons">
+            <button id="loginBtn">Login with Google</button>
+            <button id="logoutBtn" style="display:none;">Logout</button>
+        </div>
 
-  <div id="task-section" style="display: none;">
-    <h2>Add a New Task</h2>
-    <form id="task-form">
-      <input type="text" id="task-input" placeholder="Enter your task" required>
-      <button type="submit">Add Task</button>
-    </form>
+        <h2>Your Tasks</h2>
 
-    <h2>Your Tasks</h2>
-    <ul id="task-list"></ul>
-  </div>
+        <div class="add-task">
+            <input type="text" id="taskInput" placeholder="Enter a new task...">
+            <button id="addTaskBtn">Add Task</button>
+        </div>
 
-  <!-- Sticky Notes Section -->
-  <div id="sticky-notes-section" style="display: none;">
-    <h2>Sticky Notes</h2>
-    <form id="sticky-note-form">
-      <input type="text" id="sticky-note-input" placeholder="Enter a sticky note" required>
-      <button type="submit">Add Sticky Note</button>
-    </form>
-    <ul id="sticky-note-list"></ul>
-  </div>
+        <ul id="taskList"></ul>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
