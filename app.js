@@ -18,6 +18,9 @@ const signOutButton = document.querySelector("#auth-section button:nth-child(2)"
 const taskSection = document.getElementById("task-section");
 const taskForm = document.getElementById("task-form");
 const taskList = document.getElementById("task-list");
+const stickyNotesSection = document.getElementById("sticky-notes-section");
+const stickyNoteForm = document.getElementById("sticky-note-form");
+const stickyNotesList = document.getElementById("sticky-notes-list");
 
 function signIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
@@ -34,13 +37,17 @@ auth.onAuthStateChanged(user => {
     signInButton.style.display = "none";
     signOutButton.style.display = "inline-block";
     taskSection.style.display = "block";
+    stickyNotesSection.style.display = "block";
     loadTasks();
+    loadStickyNotes();
   } else {
     console.log("Not signed in");
     signInButton.style.display = "inline-block";
     signOutButton.style.display = "none";
     taskSection.style.display = "none";
+    stickyNotesSection.style.display = "none";
     taskList.innerHTML = "";
+    stickyNotesList.innerHTML = "";
   }
 });
 
@@ -48,7 +55,7 @@ taskForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const taskText = document.getElementById("task-input").value;
   if (taskText.trim() !== "") {
-    await db.collection("tasks").add({
+    const docRef = await db.collection("tasks").add({
       task: taskText,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
@@ -62,7 +69,53 @@ async function loadTasks() {
   const snapshot = await db.collection("tasks").orderBy("timestamp", "desc").get();
   snapshot.forEach(doc => {
     const li = document.createElement("li");
-    li.textContent = doc.data().task;
+    const taskText = doc.data().task;
+    li.textContent = taskText;
+
+    // Create delete button for each task
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.onclick = async () => {
+      await db.collection("tasks").doc(doc.id).delete();
+      loadTasks();
+    };
+
+    li.appendChild(deleteButton);
     taskList.appendChild(li);
+  });
+}
+
+stickyNoteForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const noteText = document.getElementById("sticky-note-input").value;
+  if (noteText.trim() !== "") {
+    const docRef = await db.collection("stickyNotes").add({
+      note: noteText,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    stickyNoteForm.reset();
+    loadStickyNotes();
+  }
+});
+
+async function loadStickyNotes() {
+  stickyNotesList.innerHTML = "";
+  const snapshot = await db.collection("stickyNotes").orderBy("timestamp", "desc").get();
+  snapshot.forEach(doc => {
+    const note = doc.data().note;
+    const div = document.createElement("div");
+    div.classList.add("sticky-note");
+    div.textContent = note;
+
+    // Create delete button for each sticky note
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.onclick = async () => {
+      await db.collection("stickyNotes").doc(doc.id).delete();
+      loadStickyNotes();
+    };
+
+    div.appendChild(deleteButton);
+    stickyNotesList.appendChild(div);
   });
 }
