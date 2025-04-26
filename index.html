@@ -1,28 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>AI Productivity Dashboard</title>
+  <meta charset="UTF-8">
+  <title>AI Productivity Dashboard</title>
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+  <script defer src="app.js"></script>
 </head>
 <body>
-    <h1>Productivity Dashboard</h1>
+  <h1>Productivity Dashboard</h1>
 
-    <button id="signInButton">Sign In with Google</button>
-    <button id="signOutButton" style="display: none;">Sign Out</button>
-    <p id="userInfo"></p>
+  <div id="auth-section">
+    <button onclick="signIn()">Sign In with Google</button>
+    <button onclick="signOut()" style="display: none;">Sign Out</button>
+  </div>
 
-    <h2>Add a Task</h2>
-    <form id="taskForm">
-        <input type="text" id="taskInput" placeholder="Enter your task" required>
-        <button type="submit">Add Task</button>
+  <div id="task-section" style="display: none;">
+    <h2>Add a New Task</h2>
+    <form id="task-form">
+      <input type="text" id="task-input" placeholder="Enter your task" required>
+      <button type="submit">Add Task</button>
     </form>
 
     <h2>Your Tasks</h2>
-    <ul id="taskList"></ul>
+    <ul id="task-list"></ul>
+  </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <script src="app.js"></script>
 </body>
 </html>
